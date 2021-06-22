@@ -5,6 +5,10 @@ The final project of XinHua and ChiYu is DRL minecraft learning with Marlo envir
 All of Requirements are listed in requirement.txt.
 There is an offical tutorial of installation Marlo environment.[Tutorial](https://marlo.readthedocs.io/en/latest/installation.html)
 
+## Before Training or Testing
+Start Minecraft Clients
+$MALMO_MINECRAFT_ROOT/launchClient.sh -port 10000
+
 ## Training
 Our codes are named by following rules : [mothod] (DQN/DDPG) + [train/test] + [environment] (Goal/mazerunner/CliffWalking)  
 You can run our training codes by using a simple command.  
