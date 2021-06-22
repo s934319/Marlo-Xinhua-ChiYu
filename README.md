@@ -25,4 +25,4 @@ Weights are updated to google drive.Please download [weights.zip](https://drive.
 weights.zip in the same folder of codes.
 See the layout:
 
-![image](https://github.com/s934319/Marlo-Xinhua-ChiYu/tree/main/image/layout.jpg)
+![image](image/layout.jpg)
