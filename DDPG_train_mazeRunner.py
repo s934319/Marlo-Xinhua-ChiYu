@@ -8,8 +8,8 @@ from tensorboardX import SummaryWriter
 
 import torch
 
-from assets.Utils import CreatFolder, random_agent_obs_mean_std
-from assets.EnvWrapper import FrameStack, WarpFrame, StackTranspose
+from assets.Utils import CreatFolder
+from assets.EnvWrapper import FrameStack, WarpFrame, StackTranspose, ActionReshape
 from assets.DDPG import DDPG
 
 
@@ -20,11 +20,11 @@ def main():
     file_path = os.path.join(folder_path, "data")
     
 
-    # 每幾個episode儲存一次model權重
+    # 每幾個step儲存一次model權重
     save_steps = 5000
 
 
-    # 目標訓練的episode數
+    # 目標訓練的step數
     n_steps = 1000000
 
 
@@ -42,7 +42,8 @@ def main():
     EPSILON = 0.9
 
     MEMORY_SIZE = 20000
-    MEMORY_WARMUP_SIZE = 2000
+    # MEMORY_WARMUP_SIZE = 2000
+    MEMORY_WARMUP_SIZE = 1000
 
 
     opticalFlow_ICM = True
@@ -53,7 +54,6 @@ def main():
 
 
     load = False
-
 
 
 
@@ -69,8 +69,7 @@ def main():
                             params={
                             "client_pool": client_pool,
                             "maze_height" : 1,
-                            # "retry_sleep" : 4,
-                            # "step_sleep" : 0.004,
+                            "seed": 654684,
                             # "prioritise_offscreen_rendering": False
                             })
     # As this is a single agent scenario,
@@ -79,9 +78,10 @@ def main():
     join_token = join_tokens[0]
 
     env = marlo.init(join_token)
-    env = WarpFrame(env)
+    env = WarpFrame(env, gray=True)
     env = FrameStack(env, n_frameStack)
     env = StackTranspose(env)
+    
 
     OBS_DIM = env.observation_space.shape
     # ACT_DIM = env.action_space.n
@@ -90,21 +90,15 @@ def main():
     print("ACT_DIM", ACT_DIM)
 
 
-    obs_mean = None
-    obs_std = None
-    if(not load):
-        obs_mean, obs_std = random_agent_obs_mean_std(env)
-        # print(obs_mean, obs_std)
+
+    env = ActionReshape(env)
     
 
-    
     agent = DDPG(
         OBS_DIM,
         ACT_DIM,
         n_frameStack,
         device,
-        obs_mean = obs_mean,
-        obs_std = obs_std,
         GAMMA = GAMMA,
         A_LR = ACTOR_LR,
         C_LR = CRITIC_LR,
@@ -133,7 +127,6 @@ def main():
     total_steps = 0
     pbar = tqdm(total=n_steps)
 
-    # for epi in tqdm(range(n_episodes)):
     while total_steps < n_steps:
 
         state_cur = env.reset()
@@ -145,8 +138,6 @@ def main():
 
         steps = 0
         while not done:
-            # action = agent.choose_action(state_cur, steps)
-            # action = agent.choose_action(state_cur)
             action = agent.choose_action(state_cur, total_steps/n_steps)
             # print(action)
 
@@ -164,7 +155,6 @@ def main():
             state_cur = state_next
             
 
-            # if(agent.memory.size() >= MEMORY_WARMUP_BATCH*BATCH_SIZE and (steps % update_interval) == 0):
             if(agent.memory.size() >= MEMORY_WARMUP_SIZE and (steps % update_interval) == 0):
                 if(opticalFlow_ICM):
                     critic_loss, actor_loss, flow_loss = agent.update()
@@ -183,9 +173,8 @@ def main():
             pbar.update(1)
 
 
-        # agent.update_noise()
+        agent.update_noise()
 
-        # if(epi % save_episode == 0):
         if(saving):
             agent.save(file_path + "_temp_" + str(total_steps), folder_path)
             saving = False

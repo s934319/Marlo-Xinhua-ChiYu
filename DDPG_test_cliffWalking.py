@@ -9,8 +9,7 @@ from assets.EnvWrapper import FrameStack, WarpFrame, StackTranspose, ActionResha
 
 
 
-
-folder_path = "./mazeRunner"
+folder_path = "./cliffWalking"
 file_path = os.path.join(folder_path, "data")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -24,11 +23,9 @@ opticalFlow_ICM = True
 
 # 設定環境
 client_pool = [('127.0.0.1', 10000)]
-join_tokens = marlo.make('MarLo-MazeRunner-v0',
+join_tokens = marlo.make('MarLo-CliffWalking-v0',
                         params={
                         "client_pool": client_pool,
-                        "maze_height" : 1,
-                        "seed": 654684,
                         "prioritise_offscreen_rendering": False
                         })
 # As this is a single agent scenario,
@@ -43,8 +40,8 @@ env = StackTranspose(env)
 env = ActionReshape(env)
 
 OBS_DIM = env.observation_space.shape
-# ACT_DIM = env.action_space.n
-ACT_DIM = 7
+ACT_DIM = env.action_space.n
+# ACT_DIM = 8
 print("OBS_DIM", OBS_DIM)
 print("ACT_DIM", ACT_DIM)
 
@@ -85,8 +82,9 @@ while not done:
 
     total_reward += reward
 
-
+    
     obs_cur = obs_next
+    
 
     n_round+=1
 

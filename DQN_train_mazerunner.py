@@ -227,11 +227,11 @@ def train():
     load = False
     if(load == False):
         obs_mean, obs_std = random_agent_obs_mean_std(env,10000)
-        torch.save(obs_mean, "./data/maze/" + "maze_obs_mean")
-        torch.save(obs_std, "./data/maze/" + "maze_obs_std")
+        torch.save(obs_mean, "./mazeRunner/" + "maze_obs_mean")
+        torch.save(obs_std, "./mazeRunner/" + "maze_obs_std")
     else:
-        obs_mean = torch.load("./data/maze/" + "maze_obs_mean")
-        obs_std = torch.load("./data/maze/" + "maze_obs_std")
+        obs_mean = torch.load("./mazeRunner/" + "maze_obs_mean")
+        obs_std = torch.load("./mazeRunner/" + "maze_obs_std")
 
     done = False
     total_reward = 0
@@ -274,10 +274,10 @@ def train():
                 print("steps_done: ",steps_done)
                 break
             if(steps_done % 1000 == 0 and i > 1): #save weight
-                torch.save(agent.learning_DQN.state_dict(), './data/maze/' + str(steps_done) + '.pth')
+                torch.save(agent.learning_DQN.state_dict(), './mazeRunner/' + str(steps_done) + '.pth')
                 #torch.save(agent.obs_mean.cpu().numpy(), "./data/" + str(steps_done) + "_obs_mean")
                 #torch.save(agent.obs_std.cpu().numpy(), "./data/",str(steps_done) + "_obs_std")
-                torch.save(agent.icm.state_dict(), './data/maze/' + str(steps_done) + "_icm")
+                torch.save(agent.icm.state_dict(), './mazeRunner/' + str(steps_done) + "_icm")
                 
 def main():
     train()

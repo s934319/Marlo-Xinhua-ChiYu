@@ -6,7 +6,7 @@ from collections import deque
 
 
 class WarpFrame(gym.ObservationWrapper):
-    def __init__(self, env):
+    def __init__(self, env, gray=False):
         """
         Warp frames to 84x84 as done in the Nature paper and later work.
         :param env: (Gym Environment) the environment
@@ -14,10 +14,13 @@ class WarpFrame(gym.ObservationWrapper):
         gym.ObservationWrapper.__init__(self, env)
         self.width = 84
         self.height = 84
-        # self.observation_space = spaces.Box(low=0, high=255, shape=(self.height, self.width, 1),
-        #                                     dtype=env.observation_space.dtype)
-        self.observation_space = spaces.Box(low=0, high=255, shape=(self.height, self.width, 3),
+        self.gray = gray
+        if(self.gray):
+            self.observation_space = spaces.Box(low=0, high=255, shape=(self.height, self.width, 1),
                                             dtype=env.observation_space.dtype)
+        else:
+            self.observation_space = spaces.Box(low=0, high=255, shape=(self.height, self.width, 3),
+                                                dtype=env.observation_space.dtype)
 
     def observation(self, frame):
         """
@@ -25,7 +28,9 @@ class WarpFrame(gym.ObservationWrapper):
         :param frame: ([int] or [float]) environment frame
         :return: ([int] or [float]) the observation
         """
-        # frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        if(self.gray):
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+            frame = frame.reshape(frame.shape[0], frame.shape[1], 1)
         frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_AREA)
         return frame
 
@@ -62,7 +67,10 @@ class FrameStack(gym.Wrapper):
   def _get_ob(self):
     assert len(self.frames) == self.n_frames
     # return np.concatenate(list(self.frames), axis=3)
-    return np.array(list(self.frames))
+    ob = np.array(list(self.frames))
+    ob = ob.reshape(self.observation_space.shape)
+    return ob
+    # return np.array(list(self.frames))
     # frameStack, H, W, C
 
 
@@ -84,8 +92,23 @@ class StackTranspose(gym.Wrapper):
 
 
     def _get_ob(self, obs):
-        # (frameStack, C, H, W)
+        # (frameStack, H, W, C)
         obs = obs.transpose((0, 3, 1, 2))
-        # (frameStack*C, H, W)
+        # (frameStack, C, H, W)
         obs = obs.reshape(*self.observation_space.shape)
+        # (frameStack*C, H, W)
         return obs
+
+
+class ActionReshape(gym.Wrapper):
+    def __init__(self, env):
+        gym.Wrapper.__init__(self, env)
+
+    def reset(self):
+        return self.env.reset()
+
+    def step(self, action):
+        # print(action)
+        action = np.argmax(action)
+        # print(action)
+        return self.env.step(action)

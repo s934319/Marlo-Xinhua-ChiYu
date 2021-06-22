@@ -41,7 +41,7 @@ class FeatureExtractor_2(nn.Module):
         # x = F.relu(self.maxp3(self.conv3(x)))
         # x = F.relu(self.maxp4(self.conv4(x)))
 
-        x = (x - self.obs_mean) / self.obs_std
+        x = x/255.0
 
         x = F.leaky_relu(self.conv1(x))
         x = F.leaky_relu(self.conv2(x))
@@ -52,7 +52,3 @@ class FeatureExtractor_2(nn.Module):
         x = self.fc1(x)
 
         return x
-
-    def set(self, obs_mean, obs_std):
-        self.obs_mean = obs_mean
-        self.obs_std = obs_std

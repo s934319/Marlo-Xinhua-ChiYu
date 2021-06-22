@@ -25,7 +25,7 @@ from assets.EnvWrapper import FrameStack, WarpFrame, StackTranspose
 from assets.NoisyNet import NoisyLinear
 
 class DQN(nn.Module):
-    def __init__(self, in_channels=3, num_actions=7):
+    def __init__(self, in_channels=3, num_actions=8):
         
         super(DQN, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, 32, kernel_size=8, stride=4)
@@ -58,12 +58,12 @@ class DQN(nn.Module):
         self.fc_z_v.reset_noise()
         self.fc_h_a.reset_noise()
         self.fc_z_a.reset_noise()
-PATH = ''
+PATH = './cliffWalking/DQN_CliffWalking.pth'
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Agent(object):
     """Agent that acts randomly."""
     def __init__(self):
-        self.learning_DQN = DQN(in_channels=3, num_actions=5).to(device)
+        self.learning_DQN = DQN(in_channels=3, num_actions=8).to(device)
         self.device = device
         self.learning_DQN.load_state_dict(torch.load(PATH))
     

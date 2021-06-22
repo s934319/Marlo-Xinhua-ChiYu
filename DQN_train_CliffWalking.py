@@ -183,7 +183,7 @@ def train():
     env = StackTranspose(env)
     action_space = env.action_space.n
     obs_shape = env.observation_space.shape
-    print(obs_shape)
+    print(action_space)
     done = False
     total_reward = 0
     agent = Agent(exp_rate = 0.0,gamma = 0.99,lr = 0.000125,num_actions = action_space)
@@ -225,7 +225,7 @@ def train():
                 print("steps_done: ",steps_done)
                 break
             if(steps_done % 1000 == 0 and i > 1): #save weight
-                torch.save(agent.learning_DQN.state_dict(), './data/CliffWalking/' + str(steps_done) + '.pth')
+                torch.save(agent.learning_DQN.state_dict(), './cliffWalking/' + str(steps_done) + '.pth')
 def main():
     train()
 

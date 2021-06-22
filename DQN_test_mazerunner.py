@@ -59,8 +59,7 @@ class DQN(nn.Module):
         self.fc_h_a.reset_noise()
         self.fc_z_a.reset_noise()
 
-steps_done = 284000
-PATH = ''
+PATH = './mazeRunner/DQN_maze.pth'
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Agent(object):
     """Agent that acts randomly."""

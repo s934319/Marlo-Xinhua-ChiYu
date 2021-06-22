@@ -8,28 +8,26 @@ from tensorboardX import SummaryWriter
 
 import torch
 
-from assets.Utils import CreatFolder, random_agent_obs_mean_std
-from assets.EnvWrapper import FrameStack, WarpFrame, StackTranspose
+# from assets.Utils import CreatFolder, random_agent_obs_mean_std
+from assets.Utils import CreatFolder
+from assets.EnvWrapper import FrameStack, WarpFrame, StackTranspose, ActionReshape
 from assets.DDPG import DDPG
 
 
 
 def main():
-    folder_path = "./findTheGoal"
+    folder_path = "./cliffWalking"
     CreatFolder(folder_path)
     file_path = os.path.join(folder_path, "data")
     
 
-    # 每幾個episode儲存一次model權重
-    # save_episode = 100
-    save_steps = 5000
+    # 每幾個step儲存一次model權重
+    save_steps = 1000
 
 
-    # 目標訓練的episode數
-    # n_episodes = 10000
-    # n_episodes = 1000000
-    # n_steps = 100000000
-    n_steps = 1000000
+    # 目標訓練的step數
+    # n_steps = 1000000
+    n_steps = 75000
 
 
     update_interval = 4
@@ -37,17 +35,15 @@ def main():
 
     n_frameStack = 4
 
-    # ACT_DIM = 7
     GAMMA = 0.995
     TAU = 1e-2
     ACTOR_LR = 1e-4
     CRITIC_LR = 1e-3
     BATCH_SIZE = 128
 
-    EPSILON = 0.1
+    EPSILON = 0.9
 
     MEMORY_SIZE = 20000
-    # MEMORY_WARMUP_BATCH = 5
     MEMORY_WARMUP_SIZE = 2000
 
 
@@ -57,6 +53,8 @@ def main():
     INT_R_COE = 0.5
     flow_update_interval = 4
 
+
+    load = False
 
 
 
@@ -68,11 +66,9 @@ def main():
 
     # 設定環境
     client_pool = [('127.0.0.1', 10000)]
-    join_tokens = marlo.make('MarLo-FindTheGoal-v0',
+    join_tokens = marlo.make('MarLo-CliffWalking-v0',
                             params={
                             "client_pool": client_pool,
-                            # "retry_sleep" : 4,
-                            # "step_sleep" : 0.004,
                             # "prioritise_offscreen_rendering": False
                             })
     # As this is a single agent scenario,
@@ -81,27 +77,26 @@ def main():
     join_token = join_tokens[0]
 
     env = marlo.init(join_token)
-    env = WarpFrame(env)
+    env = WarpFrame(env, gray=True)
     env = FrameStack(env, n_frameStack)
     env = StackTranspose(env)
+    
 
     OBS_DIM = env.observation_space.shape
     ACT_DIM = env.action_space.n
+    # ACT_DIM = 8
     print("OBS_DIM", OBS_DIM)
     print("ACT_DIM", ACT_DIM)
 
 
 
-    obs_mean, obs_std = random_agent_obs_mean_std(env)
-    # print(obs_mean, obs_std)
+    env = ActionReshape(env)
     
 
-    
+
     agent = DDPG(
         OBS_DIM,
         ACT_DIM,
-        obs_mean,
-        obs_std,
         n_frameStack,
         device,
         GAMMA = GAMMA,
@@ -119,18 +114,22 @@ def main():
     )
 
     # continue training
-    # agent.load(file_path, False, folder_path)
-    # agent.actor.train()
-    # agent.critic.train()
-    # agent.feature_extractor.train()
+    if(load):
+        agent.load(file_path, False, folder_path)
+        agent.actor.train()
+        agent.critic.train()
+        agent.feature_extractor.train()
+        if(opticalFlow_ICM):
+            agent.icm.train()
 
 
     saving = False
     total_steps = 0
     pbar = tqdm(total=n_steps)
 
-    # for epi in tqdm(range(n_episodes)):
     while total_steps < n_steps:
+
+        time.sleep(4)
 
         state_cur = env.reset()
 
@@ -141,8 +140,6 @@ def main():
 
         steps = 0
         while not done:
-            # action = agent.choose_action(state_cur, steps)
-            # action = agent.choose_action(state_cur)
             action = agent.choose_action(state_cur, total_steps/n_steps)
             # print(action)
 
@@ -160,7 +157,6 @@ def main():
             state_cur = state_next
             
 
-            # if(agent.memory.size() >= MEMORY_WARMUP_BATCH*BATCH_SIZE and (steps % update_interval) == 0):
             if(agent.memory.size() >= MEMORY_WARMUP_SIZE and (steps % update_interval) == 0):
                 if(opticalFlow_ICM):
                     critic_loss, actor_loss, flow_loss = agent.update()
@@ -179,9 +175,28 @@ def main():
             pbar.update(1)
 
 
-        # agent.update_noise()
+        agent.update_noise()
 
-        # if(epi % save_episode == 0):
+
+        if(agent.memory.size() >= MEMORY_WARMUP_SIZE):
+            for _ in range(100):
+                if(opticalFlow_ICM):
+                    critic_loss, actor_loss, flow_loss = agent.update()
+                    writer.add_scalar('step_flow_loss', flow_loss, total_steps)
+                else:
+                    critic_loss, actor_loss = agent.update()
+
+                writer.add_scalar('step_critic_loss', critic_loss, total_steps)
+                writer.add_scalar('step_actor_loss', actor_loss, total_steps)
+
+                if(total_steps % save_steps == 0):
+                    saving = True
+
+                steps += 1
+                total_steps += 1
+                pbar.update(1)
+
+
         if(saving):
             agent.save(file_path + "_temp_" + str(total_steps), folder_path)
             saving = False

@@ -225,7 +225,7 @@ def train():
                 print("steps_done: ",steps_done)
                 break
             if(steps_done % 2000 == 0 and i > 1): #save weight
-                torch.save(agent.learning_DQN.state_dict(), './data/Goal/' + str(steps_done) + '.pth')
+                torch.save(agent.learning_DQN.state_dict(), './Goal/' + str(steps_done) + '.pth')
 def main():
     train()
 
