@@ -21,13 +21,16 @@ python DQN_train_Goal.py
 ```
 weights would be saved to corresponding folder (Goal/mazeRunner/cliffWalking)
 ## Testing
-Weights are updated to google drive.Please download [weights.zip](https://drive.google.com/file/d/12BNl2e5Dh-lzW6v251Da0xy8S7OWZOiu/view?usp=sharing) and unzip
+Weights are updated to google drive.
+
+Please download [weights.zip](https://drive.google.com/file/d/12BNl2e5Dh-lzW6v251Da0xy8S7OWZOiu/view?usp=sharing) and unzip
 weights.zip in the same folder of codes.
 See the layout:
 
 ![image](image/layout.jpg)
 
 After the processes above, You can run our testing codes by using a simple command.
+
 e.g.  
 ```
 python DQN_test_Goal.py
