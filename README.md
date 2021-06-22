@@ -6,7 +6,8 @@ All of Requirements are listed in requirement.txt.
 There is an offical tutorial of installation Marlo environment.[Tutorial](https://marlo.readthedocs.io/en/latest/installation.html)
 
 ## Before Training or Testing
-Start Minecraft Clients
+Start Minecraft Clients:
+
 $MALMO_MINECRAFT_ROOT/launchClient.sh -port 10000
 
 ## Training
