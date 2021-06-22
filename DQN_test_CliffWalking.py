@@ -58,15 +58,14 @@ class DQN(nn.Module):
         self.fc_z_v.reset_noise()
         self.fc_h_a.reset_noise()
         self.fc_z_a.reset_noise()
-
-steps_done = 130000
+PATH = ''
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Agent(object):
     """Agent that acts randomly."""
     def __init__(self):
         self.learning_DQN = DQN(in_channels=3, num_actions=5).to(device)
         self.device = device
-        #self.learning_DQN.load_state_dict(torch.load('./data/Goal/no_ICM/DQN_goal' + str(steps_done) + '.pth'))
+        self.learning_DQN.load_state_dict(torch.load(PATH))
     
     def select_action(self,state):
         state_tensor = VectortoTensor(state).cuda()
@@ -79,7 +78,7 @@ def test():
     #init
     client_pool = [('127.0.0.1', 10000)]
 
-    join_tokens = marlo.make('MarLo-MazeRunner-v0',
+    join_tokens = marlo.make('MarLo-CliffWalking-v0',
                         params={
                         "client_pool": client_pool,
                                                     
@@ -96,7 +95,7 @@ def test():
     env = FrameStack(env, 1)
     env = StackTranspose(env)
     action_space = env.action_space.n
-    print(action_space)
+
     done = False
     total_reward = 0
     agent = Agent()

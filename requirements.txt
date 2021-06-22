@@ -1,0 +1,7 @@
+numpy==1.20.3
+opencv_python==4.5.2.54
+tqdm==4.61.0
+marlo==0.0.1.dev23
+gym==0.18.3
+torch==1.8.1
+tensorboardX==2.2

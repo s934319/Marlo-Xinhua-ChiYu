@@ -60,13 +60,14 @@ class DQN(nn.Module):
         self.fc_z_a.reset_noise()
 
 steps_done = 284000
+PATH = ''
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Agent(object):
     """Agent that acts randomly."""
     def __init__(self):
         self.learning_DQN = DQN(in_channels=3, num_actions=5).to(device)
         self.device = device
-        self.learning_DQN.load_state_dict(torch.load('./data/maze/' + str(steps_done) + '.pth'))
+        self.learning_DQN.load_state_dict(torch.load(PATH))
     
     def select_action(self,state):
         state_tensor = VectortoTensor(state).cuda()

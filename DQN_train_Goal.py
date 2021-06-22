@@ -86,8 +86,8 @@ class Agent(object):
         self.optimizer = torch.optim.Adam(self.learning_DQN.parameters(), lr=lr)
         self.prioritiedReplayMemory = PrioritiedReplayMemory(10000,20)
     def load(self):
-        self.learning_DQN.load_state_dict(torch.load('./data/Goal/no_ICM/DQN_goal84000.pth'))
-        self.learning_DQN.load_state_dict(torch.load('./data/Goal/no_ICM/DQN_goal84000.pth'))
+        self.learning_DQN.load_state_dict(torch.load(PATH))
+        self.learning_DQN.load_state_dict(torch.load(PATH))
     def random_act(self,state):
         return self.action_space.sample()
     def get_Q_max(self,state):
@@ -225,7 +225,7 @@ def train():
                 print("steps_done: ",steps_done)
                 break
             if(steps_done % 2000 == 0 and i > 1): #save weight
-                torch.save(agent.learning_DQN.state_dict(), './data/Goal/no_ICM/DQN_Goal' + str(steps_done) + '.pth')
+                torch.save(agent.learning_DQN.state_dict(), './data/Goal/' + str(steps_done) + '.pth')
 def main():
     train()
 
