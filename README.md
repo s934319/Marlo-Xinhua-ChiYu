@@ -26,3 +26,9 @@ weights.zip in the same folder of codes.
 See the layout:
 
 ![image](image/layout.jpg)
+
+After the processes above, You can run our testing codes by using a simple command.
+e.g.  
+```
+python DQN_test_Goal.py
+```
