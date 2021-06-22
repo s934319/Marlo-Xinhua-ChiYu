@@ -23,4 +23,6 @@ weights would be saved to corresponding folder (Goal/mazeRunner/cliffWalking)
 ## Testing
 Weights are updated to google drive.Please download [weights.zip](https://drive.google.com/file/d/12BNl2e5Dh-lzW6v251Da0xy8S7OWZOiu/view?usp=sharing) and unzip
 weights.zip in the same folder of codes.
-See the layout
+See the layout:
+
+![image](https://github.com/s934319/Marlo-Xinhua-ChiYu/tree/main/image/layout.jpg)
